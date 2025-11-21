@@ -492,6 +492,7 @@ GameObject:
   - component: {fileID: 1048284171}
   - component: {fileID: 1048284170}
   - component: {fileID: 1048284175}
+  - component: {fileID: 1048284176}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -538,7 +539,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &1048284172
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -674,6 +675,19 @@ MonoBehaviour:
   enemyLayers:
     serializedVersion: 2
     m_Bits: 544
+--- !u!114 &1048284176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1048284169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90fc0af3b724a1643a46de6bc453ab56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
 --- !u!1 &1643924181
 GameObject:
   m_ObjectHideFlags: 0
@@ -706,10 +720,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e2f9ad8aa08cc0468c3253c0e174633, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
   player: {fileID: 1048284174}
   speed: 3
   followRange: 2
+  damage: 50
+  knockbackForce: 30
+  stunTime: 0.3
 --- !u!212 &1643924183
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -806,7 +822,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!70 &1643924186
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

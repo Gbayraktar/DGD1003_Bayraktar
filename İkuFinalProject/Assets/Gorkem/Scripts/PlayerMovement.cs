@@ -1,36 +1,58 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Hýz Ayarlarý")]
-    public float moveSpeed = 5f; // Karakterin yürüme hýzý
+    [Header("Hï¿½z Ayarlarï¿½")]
+    public float moveSpeed = 5f; // Karakterin yï¿½rï¿½me hï¿½zï¿½
 
     private Rigidbody2D rb;
-    private Vector2 movement; // X ve Y eksenindeki hareket yönünü tutar
+    private Vector2 movement;
+    private bool isKnockedBack = false; // Geri tepme kontrolï¿½
 
     void Start()
     {
-        // Karakterin üzerindeki Rigidbody2D bileþenini alýyoruz
         rb = GetComponent<Rigidbody2D>();
     }
 
-    // Girdileri (Input) buradan alýrýz
     void Update()
     {
-        // Yatay (A-D veya Sol-Sað Ok) ve Dikey (W-S veya Yukarý-Aþaðý Ok) girdileri al
-        // GetAxisRaw kullanýyoruz ki karakter tuþu býrakýnca hemen dursun (buzda kayýyormuþ gibi olmasýn)
+        // Eï¿½er darbe aldï¿½ysak (isKnockedBack = true), tuï¿½larï¿½ dinleme
+        if (isKnockedBack == true) return;
+
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
-
-        // Çapraz giderken daha hýzlý gitmemesi için vektörü normalize et (Ýsteðe baðlý)
         movement = movement.normalized;
     }
 
-    // Fizik iþlemlerini (hareket ettirmeyi) burada yaparýz
     void FixedUpdate()
     {
-        // Mevcut pozisyon + (Yön * Hýz * Zaman)
+        // Eï¿½er darbe aldï¿½ysak hareket kodunu ï¿½alï¿½ï¿½tï¿½rma, fiziï¿½e bï¿½rak
+        if (isKnockedBack == true) return;
+
         rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
+    }
+
+    // --- ï¿½ï¿½TE EKSï¿½K OLAN KISIM BURASI ---
+    // Dï¿½ï¿½man scripti bu fonksiyonu arï¿½yor
+    public void CallKnockback(float duration, float force, Transform enemyTransform)
+    {
+        StartCoroutine(KnockbackRoutine(duration, force, enemyTransform));
+    }
+
+    IEnumerator KnockbackRoutine(float duration, float force, Transform enemyTransform)
+    {
+        isKnockedBack = true; // Kontrolï¿½ kapat
+        rb.linearVelocity = Vector2.zero; // Hï¿½zï¿½ sï¿½fï¿½rla
+
+        // Dï¿½ï¿½mandan zï¿½t yï¿½ne doï¿½ru fï¿½rlat
+        Vector2 direction = (transform.position - enemyTransform.position).normalized;
+        rb.AddForce(direction * force, ForceMode2D.Impulse);
+
+        yield return new WaitForSeconds(duration); // Bekle
+
+        rb.linearVelocity = Vector2.zero; // Durdur
+        isKnockedBack = false; // Kontrolï¿½ geri ver
     }
 }
 

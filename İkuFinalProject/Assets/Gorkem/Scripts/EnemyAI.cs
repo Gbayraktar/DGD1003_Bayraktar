@@ -1,94 +1,89 @@
 using UnityEngine;
+using System.Collections;
 
 public class EnemyAI : MonoBehaviour
 {
-    [Header("Can Ayarlarý")]
-    public int maxHealth = 100;    // Düþmanýn maksimum caný
-    private int currentHealth;     // O anki caný (kod içinde deðiþecek)
-
-    [Header("Hareket Ayarlarý")]
+    [Header("Ayarlar")]
     public Transform player;
     public float speed = 3f;
     public float followRange = 5f;
 
+    [Header("Saldï¿½rï¿½ & Fizik")]
+    public int damage = 20;
+    public float knockbackForce = 10f; // ï¿½tme gï¿½cï¿½
+    public float stunTime = 0.3f;      // Ne kadar sï¿½re sersemlesinler?
+
+    private Rigidbody2D rb;
+    private int currentHealth = 100; // Basit can sistemi
+    private bool isKnockedBack = false; // Sersemleme kontrolï¿½
+
     void Start()
     {
-        // Oyuna baþlarken caný fulle
-        currentHealth = maxHealth;
-
-        // Player'ý otomatik bulma (Eðer sürükleyip býrakmadýysan)
-        if (player == null)
-        {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
-            {
-                player = playerObj.transform;
-            }
-        }
+        rb = GetComponent<Rigidbody2D>();
+        // Player'ï¿½ bulma kodu
+        if (player == null && GameObject.FindGameObjectWithTag("Player") != null)
+            player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
     void Update()
     {
         if (player == null) return;
 
-        // 1. MESAFE VE TAKÝP KODLARI
-        float distance = Vector2.Distance(transform.position, player.position);
+        // Eï¿½ER SERSEMLEMï¿½ï¿½SE (KNOCKBACK YEMï¿½ï¿½SE) HAREKET ETME!
+        if (isKnockedBack) return;
 
+        // Mesafe ï¿½lï¿½ ve takip et
+        float distance = Vector2.Distance(transform.position, player.position);
         if (distance < followRange)
         {
-            // Takip ederken sürekli log atmasýn diye bu satýrý yoruma aldým, istersen açabilirsin:
-            // Debug.Log("DÜÞMAN: Takip ediyor..."); 
             transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
         }
     }
 
-    // --- CAN VE HASAR ALMA SÝSTEMÝ ---
-
-    // Bu fonksiyonu dýþarýdan (silahýndan) çaðýracaðýz
     public void TakeDamage(int damageAmount)
     {
-        // Caný azalt
         currentHealth -= damageAmount;
-
-        Debug.Log("DÜÞMAN: Hasar aldý! Kalan Can: " + currentHealth);
-
-        // Can 0 veya altýna düþtü mü kontrol et
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+        if (currentHealth <= 0) Destroy(gameObject);
     }
 
-    void Die()
-    {
-        Debug.Log("DÜÞMAN: Öldü ve yok ediliyor!");
-
-        // Efekt eklemek istersen buraya yazabilirsin (Örn: Patlama efekti)
-
-        Destroy(gameObject); // Düþmaný sahneden sil
-    }
-
-    // --- PLAYER'A ÇARPMA KISMI ---
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("DÜÞMAN: Player'a çarptý! Player ölüyor.");
-            Destroy(collision.gameObject);
+            // 1. PLAYER'A HASAR VER
+            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+            if (playerHealth != null) playerHealth.TakeDamage(damage);
+
+            // 2. PLAYER'I GERï¿½ FIRLAT (PlayerMovement iï¿½indeki fonksiyonu ï¿½aï¿½ï¿½r)
+            PlayerMovement playerMove = collision.gameObject.GetComponent<PlayerMovement>();
+            if (playerMove != null)
+            {
+                // Player'a "Benden uzaklaï¿½" diyoruz
+                playerMove.CallKnockback(stunTime, knockbackForce, transform);
+            }
+
+            // 3. Dï¿½ï¿½MANI (KENDï¿½Nï¿½) GERï¿½ FIRLAT
+            StartCoroutine(EnemyKnockbackRoutine(collision.transform));
         }
     }
 
-    // --- TEST ÝÇÝN (SÝLEBÝLÝRSÝN) ---
-    // Oyun çalýþýrken düþmanýn üzerine mouse ile týklarsan 20 caný gider.
-    private void OnMouseDown()
+    // Dï¿½ï¿½manï¿½n kendi geriye tepme rutini
+    IEnumerator EnemyKnockbackRoutine(Transform playerTransform)
     {
-        TakeDamage(20);
-    }
+        isKnockedBack = true; // Takip etmeyi durdur
 
-    // Menzili çizme (Gizmos)
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, followRange);
+        // Yï¿½nï¿½ hesapla: (Benim yerim - Player'ï¿½n yeri) = Geriye doï¿½ru
+        Vector2 direction = (transform.position - playerTransform.position).normalized;
+
+        // Kendine kuvvet uygula
+        rb.linearVelocity = Vector2.zero; // ï¿½nceki hï¿½zï¿½nï¿½ sï¿½fï¿½rla
+        rb.AddForce(direction * knockbackForce, ForceMode2D.Impulse);
+
+        // Sersemleme sï¿½resi kadar bekle
+        yield return new WaitForSeconds(stunTime);
+
+        // Normale dï¿½n
+        rb.linearVelocity = Vector2.zero; // Kaymayï¿½ durdur
+        isKnockedBack = false;
     }
 }
