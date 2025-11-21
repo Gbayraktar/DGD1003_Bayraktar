@@ -1,70 +1,84 @@
 using UnityEngine;
+using System.Collections; // Coroutine için gerekli
 
 public class PlayerAttacksc : MonoBehaviour
 {
     [Header("Saldýrý Ayarlarý")]
-    public GameObject bulletPrefab; // Mermi prefabý
-    public float attackRange = 3f;  // Saldýrý menzili (Halka boyutu)
-    public float fireRate = 0.5f;   // Ateþ etme hýzý (Saniye baþý bekleme)
-    public LayerMask enemyLayers;   // Sadece düþmanlarý görmek için
+    public GameObject bulletPrefab;
+    public float attackRange = 3f;
+    public LayerMask enemyLayers;
+
+    [Header("Hýz Dengesi")]
+    public float fireRate = 0.6f;      // Baþlangýç hýzý (Saniye)
+    public float minFireRate = 0.1f;   // Limit: Bundan daha hýzlý olamaz!
 
     private float nextFireTime = 0f;
 
     void Update()
     {
-        // Eðer ateþ etme zamaný geldiyse (Cooldown bittiyse)
+        // Ateþ etme zamaný geldiyse
         if (Time.time >= nextFireTime)
         {
-            // En yakýndaki düþmaný bul
             Transform targetEnemy = FindClosestEnemy();
 
-            // Eðer menzilde bir düþman varsa ateþ et
             if (targetEnemy != null)
             {
                 Shoot(targetEnemy);
-
-                // Bir sonraki ateþ zamanýný ayarla
                 nextFireTime = Time.time + fireRate;
             }
         }
     }
 
-    // En yakýn düþmaný bulan fonksiyon
+    // --- KALICI GÜÇLENME FONKSÝYONU ---
+    // Bu fonksiyon item tarafýndan çaðrýlacak
+    public void PermanentSpeedUpgrade(float amount)
+    {
+        // Mevcut süreden, gelen miktarý çýkar (Süre azaldýkça hýz artar)
+        fireRate -= amount;
+
+        // LÝMÝT KONTROLÜ (Dengeleme)
+        // Eðer hýz çok arttýysa (sayý çok küçüldüyse), limite sabitle
+        if (fireRate < minFireRate)
+        {
+            fireRate = minFireRate;
+            Debug.Log("Maksimum Hýza Ulaþýldý!");
+        }
+        else
+        {
+            Debug.Log("Kalýcý Hýz Artýþý! Yeni Hýz: " + fireRate);
+        }
+    }
+
+    // ... (FindClosestEnemy, Shoot ve Gizmos kodlarý ayný kalacak) ...
+    // Kopyala-Yapýþtýr kolay olsun diye onlarý tekrar aþaðýya yazýyorum:
+
     Transform FindClosestEnemy()
     {
-        // Menzil içindeki tüm düþmanlarý tara
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayers);
-
         Transform closest = null;
-        float minDistance = Mathf.Infinity; // Baþlangýçta en kýsa mesafe sonsuz kabul edilir
+        float minDistance = Mathf.Infinity;
 
         foreach (Collider2D enemy in hitEnemies)
         {
             float distance = Vector2.Distance(transform.position, enemy.transform.position);
-
-            // Eðer bu düþman, þu ana kadar bulduðumuzdan daha yakýnsa, yeni hedef bu olur
             if (distance < minDistance)
             {
                 minDistance = distance;
                 closest = enemy.transform;
             }
         }
-
-        return closest; // En yakýn düþmaný (veya kimse yoksa null) döndür
+        return closest;
     }
 
     void Shoot(Transform target)
     {
-        // Düþmana doðru olan açýyý hesapla
+        if (bulletPrefab == null) return;
         Vector2 direction = target.position - transform.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-        // Mermiyi o açýya göre döndürerek oluþtur
         Quaternion rotation = Quaternion.Euler(0, 0, angle);
         Instantiate(bulletPrefab, transform.position, rotation);
     }
 
-    // Editörde menzili görmek için
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
