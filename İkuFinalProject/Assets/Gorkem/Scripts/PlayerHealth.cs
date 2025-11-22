@@ -24,6 +24,13 @@ public class PlayerHealth : MonoBehaviour
             Die();
         }
     }
+    public void HealFull()
+    {
+        // Caný maksimum deðere eþitle
+        currentHealth = maxHealth;
+
+        Debug.Log("ÝKSÝR ALINDI! Can Fullendi. Þu anki Can: " + currentHealth);
+    }
 
     void Die()
     {

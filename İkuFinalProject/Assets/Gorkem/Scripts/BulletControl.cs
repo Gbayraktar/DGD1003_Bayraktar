@@ -28,7 +28,6 @@ public class BulletControl : MonoBehaviour
         }
         else
         {
-            Debug.Log("HAYIR! �arpt���m �eyde 'EnemyAI' scripti YOK. Neye �arpt�m? -> " + hitInfo.name);
         }
     }
 }
