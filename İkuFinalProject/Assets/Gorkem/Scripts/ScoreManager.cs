@@ -33,7 +33,7 @@ public class ScoreManager : MonoBehaviour
         if (scoreText != null)
         {
             // Yazý atama kýsmý aynýdýr (.text)
-            scoreText.text = "Score: " + score.ToString();
+            scoreText.text = "GOLD: " + score.ToString();
         }
     }
 }

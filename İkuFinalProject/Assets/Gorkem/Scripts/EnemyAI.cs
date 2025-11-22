@@ -20,6 +20,7 @@ public class EnemyAI : MonoBehaviour
     private int currentHealth = 100; // Basit can sistemi
     private bool isKnockedBack = false; // Sersemleme kontrol�
 
+    public GameObject xpPrefab;
 
 
     void Start()
@@ -59,8 +60,19 @@ public class EnemyAI : MonoBehaviour
 
     void Die()
     {
-        // --- İŞTE BU SATIRI EKLİYORUZ ---
-        // Eğer ScoreManager varsa, puan ekle
+        LootBag lootBag = GetComponent<LootBag>();
+        if (lootBag != null)
+        {
+            lootBag.DropLoot();
+        }
+
+        if (xpPrefab != null)
+        {
+            Instantiate(xpPrefab, transform.position, Quaternion.identity);
+        }
+
+
+
         if (ScoreManager.instance != null)
         {
             ScoreManager.instance.AddScore(scoreValue);
