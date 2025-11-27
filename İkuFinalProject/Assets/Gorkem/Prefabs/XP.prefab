@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bc1617149033e428936d230a60e1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xpAmount: 1
+  xpAmount: 5
   magnetRange: 1
   flySpeed: 5
 --- !u!61 &8113176357714622226

@@ -46,6 +46,20 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = maxHealth;
         UpdateUI();
     }
+    public void IncreaseMaxHealth(int amount)
+    {
+        maxHealth += amount;      // Kapasiteyi artır
+        currentHealth += amount;  // Artan miktar kadar mevcut cana da ekle
+
+        // UI varsa güncelle (Eğer slider kullanıyorsan)
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
+        }
+
+        Debug.Log($"MAX CAN ARTTI! Yeni Max Can: {maxHealth}");
+    }
 
     void Die()
     {

@@ -53,6 +53,11 @@ public class PlayerMovement : MonoBehaviour
             Flip();
         }
     }
+    public void IncreaseMoveSpeed(float amount)
+    {
+        moveSpeed += amount; // Mevcut hıza ekle
+        Debug.Log($"KOŞU HIZI ARTTI! Yeni Hız: {moveSpeed}");
+    }
 
     void FixedUpdate()
     {

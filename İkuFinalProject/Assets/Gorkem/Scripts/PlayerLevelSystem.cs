@@ -16,6 +16,8 @@ public class PlayerLevelSystem : MonoBehaviour
     public float xpToNextLevel = 10;   // Ýlk seviye için gereken (Örn: 10)
     public float difficultyIncrease = 5; // Her levelde kaç artacak? (Örn: +5)
 
+    public LevelUpManager levelManager;
+
     void Start()
     {
         UpdateUI();
@@ -37,24 +39,21 @@ public class PlayerLevelSystem : MonoBehaviour
     void LevelUp()
     {
         currentLevel++;
-
-        // 1. Artan XP'yi hesapla (Taþan XP kaybolmasýn)
-        // Örn: 12 XP topladýn, hedef 10 ise -> 2 XP cepte kalsýn.
         float overflowXP = currentXP - xpToNextLevel;
         currentXP = overflowXP;
 
-        // 2. ZORLAÞTIRMA KISMI (Senin istediðin yer)
-        // Hedefi artýrýyoruz. (10 -> 15 -> 20 -> 25...)
+        // Zorluk artýþý
         xpToNextLevel += difficultyIncrease;
 
         Debug.Log($"LEVEL ATLADIN! Yeni Level: {currentLevel}");
-        Debug.Log($"Sýradaki Level Ýçin Gereken: {xpToNextLevel}");
 
-        // Eðer taþan XP, yeni hedefi de geçiyorsa tekrar level atlat (Nadir durum)
-        if (currentXP >= xpToNextLevel)
+        // --- DEÐÝÞEN KISIM BURASI ---
+        // Paneli açmasý için Manager'a haber ver
+        if (levelManager != null)
         {
-            LevelUp();
+            levelManager.ShowLevelUpOptions();
         }
+        // ----------------------------
 
         UpdateUI();
     }

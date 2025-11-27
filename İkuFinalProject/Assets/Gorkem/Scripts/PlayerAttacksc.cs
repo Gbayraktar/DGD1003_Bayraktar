@@ -12,6 +12,9 @@ public class PlayerAttacksc : MonoBehaviour
     public float fireRate = 0.6f;      // Baþlangýç hýzý (Saniye)
     public float minFireRate = 0.1f;   // Limit: Bundan daha hýzlý olamaz!
 
+    [Header("Görsel Ayar")]
+    public Transform visualAura;
+
     private float nextFireTime = 0f;
 
     void Update()
@@ -33,21 +36,25 @@ public class PlayerAttacksc : MonoBehaviour
     // Bu fonksiyon item tarafýndan çaðrýlacak
     public void PermanentSpeedUpgrade(float amount)
     {
-        // Mevcut süreden, gelen miktarý çýkar (Süre azaldýkça hýz artar)
         fireRate -= amount;
-
-        // LÝMÝT KONTROLÜ (Dengeleme)
-        // Eðer hýz çok arttýysa (sayý çok küçüldüyse), limite sabitle
-        if (fireRate < minFireRate)
-        {
-            fireRate = minFireRate;
-            Debug.Log("Maksimum Hýza Ulaþýldý!");
-        }
-        else
-        {
-            Debug.Log("Kalýcý Hýz Artýþý! Yeni Hýz: " + fireRate);
-        }
+        if (fireRate < minFireRate) fireRate = minFireRate;
+        Debug.Log("SALDIRI HIZI ARTTI!");
     }
+    public void IncreaseRange(float amount)
+    {
+        // 1. Mantýksal menzili artýr (Düþmanlarý daha uzaktan gör)
+        attackRange += amount;
+
+        // 2. Görsel halkayý büyüt (Opsiyonel ama çok þýk durur)
+        if (visualAura != null)
+        {
+            // Halkanýn boyutuna ekleme yap
+            visualAura.localScale += new Vector3(amount, amount, 0);
+        }
+
+        Debug.Log($"MENZÝL ARTTI! Yeni Menzil: {attackRange}");
+    }
+
 
     // ... (FindClosestEnemy, Shoot ve Gizmos kodlarý ayný kalacak) ...
     // Kopyala-Yapýþtýr kolay olsun diye onlarý tekrar aþaðýya yazýyorum:
