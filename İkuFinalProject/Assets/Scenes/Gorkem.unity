@@ -2591,10 +2591,13 @@ MonoBehaviour:
     prefab: {fileID: 4298860008882341506, guid: 85b1ef0b66eec564d938bf008bb6ce3d, type: 3}
     startMinute: 3
     messageShown: 0
+  bossPrefab: {fileID: 6786446922949375804, guid: 1941f9e2ea9cdd9489e0bd50caa26bcb, type: 3}
+  bossSpawnMinute: 5
+  bossWarningMessage: "D\u0130KKAT! B\xD6L\xDCM SONU CANAVARI!"
   waveWarningText: {fileID: 2141445860}
   spawnInterval: 1
-  spawnRadius: 12.75
-  maxEnemies: 5
+  spawnRadius: 30.1
+  maxEnemies: 10
 --- !u!4 &1146545144
 Transform:
   m_ObjectHideFlags: 0
@@ -2604,43 +2607,10 @@ Transform:
   m_GameObject: {fileID: 1146545142}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.9, y: 8.5, z: -0.05412388}
+  m_LocalPosition: {x: 0.24, y: -1.8, z: -9.927792}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1149778766}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1149778765
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1149778766}
-  m_Layer: 0
-  m_Name: Spawnnerss
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1149778766
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1149778765}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.4591714, y: -1.0286064, z: -9.873668}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1146545144}
-  - {fileID: 2016550054}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1176547908
@@ -4292,63 +4262,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1918684159}
   m_CullTransparentMesh: 1
---- !u!1 &2016550053
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2016550054}
-  - component: {fileID: 2016550055}
-  m_Layer: 0
-  m_Name: EnemySpawnner (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2016550054
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2016550053}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.4491714, y: -12.6, z: -0.05412388}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1149778766}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2016550055
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2016550053}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7da1d184e80b8fe48808c118efcbdba0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enemies:
-  - name: "zay\u0131f"
-    prefab: {fileID: 6967696687398031537, guid: 512f4a35f299b674cb4834fbef2e0bc7, type: 3}
-    startMinute: 0
-    messageShown: 0
-  - name: orta
-    prefab: {fileID: 4298860008882341506, guid: 85b1ef0b66eec564d938bf008bb6ce3d, type: 3}
-    startMinute: 3
-    messageShown: 0
-  waveWarningText: {fileID: 2141445860}
-  spawnInterval: 2
-  spawnRadius: 5
-  maxEnemies: 10
 --- !u!1 &2019271141
 GameObject:
   m_ObjectHideFlags: 0
@@ -5088,5 +5001,5 @@ SceneRoots:
   - {fileID: 1048284174}
   - {fileID: 1333372305}
   - {fileID: 1329168488}
-  - {fileID: 1149778766}
+  - {fileID: 1146545144}
   - {fileID: 2102407027}

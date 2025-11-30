@@ -8,13 +8,13 @@ public class EnemyAI : MonoBehaviour
     private Rigidbody2D rb;     // Fizik bileşeni
 
     [Header("Hareket Ayarları")]
-    public Transform player;       // Hedef (Player)
-    public float speed = 3f;       // Yürüme hızı
+    public Transform player;        // Hedef (Player)
+    public float speed = 3f;        // Yürüme hızı
     public float followRange = 10f; // Takip mesafesi
 
     [Header("Can Ayarları")]
-    public int maxHealth = 100;    // Maksimum can (Spawner bunu değiştirebilir)
-    public int currentHealth;      // Anlık can
+    public int maxHealth = 100;     // Maksimum can
+    public int currentHealth;       // Anlık can
 
     [Header("Saldırı & Fizik")]
     public int damage = 10;            // Player'a vereceği hasar
@@ -22,21 +22,30 @@ public class EnemyAI : MonoBehaviour
     public float stunTime = 0.3f;      // Darbe alınca sersemleme süresi
 
     [Header("Ödüller")]
-    public GameObject xpPrefab;    // XP Topu Prefabı
-    public int scoreValue = 10;    // Ölünce kaç puan versin?
+    public GameObject xpPrefab;     // XP Topu Prefabı
+    public int scoreValue = 10;     // Ölünce kaç puan versin?
+
+    [Header("Boss Ayarı")]
+    public bool isBoss = false;
 
     // Düşmanın o an sersemleyip sersemlemediğini kontrol eder
     private bool isKnockedBack = false;
+
+    // Boss boyutunun bozulmaması için başlangıç boyutunu hafızada tutuyoruz
+    private Vector3 defaultScale;
 
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
 
-        // Oyuna başlarken canı fulle
+        // Canı fulle
         currentHealth = maxHealth;
 
-        // Player'ı otomatik bul (Eğer elle atanmadıysa)
+        // Başlangıç boyutunu kaydet (Boss ise 3,3,1 kalır)
+        defaultScale = transform.localScale;
+
+        // Player'ı otomatik bul
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -51,7 +60,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (player == null) return;
 
-        // EĞER SERSEMLEMİŞSE (KNOCKBACK YEMİŞSE) HAREKET ETME!
+        // Eğer darbe yemişse (Knockback), hareket etmesin
         if (isKnockedBack) return;
 
         // Player ile mesafe ölç
@@ -63,15 +72,22 @@ public class EnemyAI : MonoBehaviour
             // Player'a doğru hareket et
             transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
 
-            // --- ANİMASYON: YÜRÜME ---
+            // Animasyon: Yürüme (Speed 1)
             if (anim != null) anim.SetFloat("Speed", 1f);
 
             // --- YÖN ÇEVİRME (FLIP) ---
             // Player sağda mı solda mı? Ona göre yüzünü dön.
+            // defaultScale kullanarak Boss'un küçülmesini engelliyoruz.
             if (player.position.x > transform.position.x)
-                transform.localScale = new Vector3(1, 1, 1); // Sağa bak
+            {
+                // SAĞA BAK (Pozitif Boyut)
+                transform.localScale = new Vector3(Mathf.Abs(defaultScale.x), defaultScale.y, defaultScale.z);
+            }
             else
-                transform.localScale = new Vector3(-1, 1, 1); // Sola bak
+            {
+                // SOLA BAK (Negatif Boyut)
+                transform.localScale = new Vector3(-Mathf.Abs(defaultScale.x), defaultScale.y, defaultScale.z);
+            }
         }
         else
         {
@@ -85,7 +101,7 @@ public class EnemyAI : MonoBehaviour
     {
         currentHealth -= damageAmount;
 
-        // --- ANİMASYON: DARBE (HIT) ---
+        // Animasyon: Darbe (Hit)
         if (anim != null) anim.SetTrigger("Hit");
 
         if (currentHealth <= 0)
@@ -106,7 +122,7 @@ public class EnemyAI : MonoBehaviour
                 playerHealth.TakeDamage(damage);
             }
 
-            // 2. PLAYER'I GERİ İT (PlayerMovement içindeki fonksiyonu çağır)
+            // 2. PLAYER'I GERİ İT
             PlayerMovement playerMove = collision.gameObject.GetComponent<PlayerMovement>();
             if (playerMove != null)
             {
@@ -141,12 +157,23 @@ public class EnemyAI : MonoBehaviour
     // --- ÖLÜM FONKSİYONU ---
     void Die()
     {
+        // 1. PUAN VER VE LEŞ SAY
         if (ScoreManager.instance != null)
         {
-            ScoreManager.instance.AddScore(scoreValue); // Puan ver
-
-            ScoreManager.instance.AddKill(); // <-- YENİ EKLENEN SATIR (Sayaç Artsın)
+            ScoreManager.instance.AddScore(scoreValue);
+            ScoreManager.instance.AddKill();
         }
+        if (isBoss)
+        {
+            Debug.Log("BOSS ÖLDÜ! OYUN BİTTİ - KAZANDIN!");
+
+            // Oyunu dondur
+            Time.timeScale = 0f;
+
+            // İleride buraya "WinScreen.SetActive(true)" yazacağız.
+            // Şimdilik sadece donması yeterli.
+        }
+
 
         // 2. XP DÜŞÜR
         if (xpPrefab != null)
