@@ -57,6 +57,6 @@ public class LevelMenu : MonoBehaviour
     public void LoadLevel2()
     {
         // Sahnenin adýnýn tam olarak "Level2" olduðundan emin ol
-        SceneManager.LoadScene("Level2");
+        SceneManager.LoadScene("Mami");
     }
 }
