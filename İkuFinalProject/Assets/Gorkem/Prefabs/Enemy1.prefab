@@ -116,6 +116,7 @@ MonoBehaviour:
   scoreValue: 10
   deathSound: {fileID: 8300000, guid: 4bb1996c063366c48bca88e761006d4f, type: 3}
   isBoss: 0
+  deathEffectPrefab: {fileID: 5522037571807445211, guid: e13c7bce373e96241938ea1fea94849d, type: 3}
 --- !u!50 &2369775192282770610
 Rigidbody2D:
   serializedVersion: 5

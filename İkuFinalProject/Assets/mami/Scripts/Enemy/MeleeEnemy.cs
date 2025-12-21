@@ -17,6 +17,7 @@ public class MeleeEnemy : MonoBehaviour
     private Health playerHealth;
 
     private EnemyPatrol enemyPatrol;
+
     private void Awake()
     {
         anim = GetComponent<Animator>();
@@ -30,7 +31,8 @@ public class MeleeEnemy : MonoBehaviour
         //Attack only when player in sight?
         if (PlayerInSight())
         {
-            if (cooldownTimer >= attackCooldown && playerHealth.currentHealth > 0)
+            // playerHealth'in null olmadýðýndan emin oluyoruz
+            if (cooldownTimer >= attackCooldown && playerHealth != null && playerHealth.currentHealth > 0)
             {
                 cooldownTimer = 0;
                 anim.SetTrigger("meleeAttack");
@@ -45,10 +47,19 @@ public class MeleeEnemy : MonoBehaviour
     private bool PlayerInSight()
     {
         RaycastHit2D hit = Physics2D.BoxCast(boxCollider.bounds.center + transform.right * range * transform.localScale.x * colliderDistance,
-            new Vector3(boxCollider.bounds.size.x * range, boxCollider.bounds.size.y,boxCollider.bounds.size.z),
+            new Vector3(boxCollider.bounds.size.x * range, boxCollider.bounds.size.y, boxCollider.bounds.size.z),
               0, Vector2.left, 0, playerLayer);
-        playerHealth = hit.transform.GetComponent<Health>();
-        return hit.collider != null;
+
+        // DÜZELTME BURADA YAPILDI:
+        // Önce bir þeye çarpýp çarpmadýðýmýzý kontrol ediyoruz.
+        if (hit.collider != null)
+        {
+            playerHealth = hit.transform.GetComponent<Health>();
+            return true;
+        }
+
+        // Eðer bir þeye çarpmadýysak false dönüyoruz.
+        return false;
     }
 
     private void OnDrawGizmos()
@@ -61,10 +72,12 @@ public class MeleeEnemy : MonoBehaviour
            new Vector3(boxCollider.bounds.size.x * range, boxCollider.bounds.size.y, boxCollider.bounds.size.z));
         }
     }
+
     private void DamagePlayer()
     {
-        if (PlayerInSight())
+        // Burada da playerHealth kontrolü eklemek güvenli olur
+        if (PlayerInSight() && playerHealth != null)
             playerHealth.TakeDamage(damage);
-        
+
     }
 }

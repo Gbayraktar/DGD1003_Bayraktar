@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    [Header ("Health")]
+    [Header("Health")]
     [SerializeField] private float startingHealth;
-    public float currentHealth { get; private set;  }
+    public float currentHealth { get; private set; }
     private Animator anim;
     private bool dead;
 
@@ -33,34 +33,43 @@ public class Health : MonoBehaviour
         {
             anim.SetTrigger("hurt");
             StartCoroutine(Invunerability());
-            SoundManager.instance.PlaySound(hurtSound);
+
+            // SoundManager yoksa hata vermemesi için kontrol eklendi
+            if (SoundManager.instance != null)
+                SoundManager.instance.PlaySound(hurtSound);
         }
         else
         {
-            if(!dead)
+            if (!dead)
             {
                 anim.SetTrigger("die");
-                // Player 
+
+                // --- PLAYER ---
                 if (GetComponent<PlayerMovement>() != null)
                     GetComponent<PlayerMovement>().enabled = false;
 
-                //Enemy
+                // --- ENEMY (Patrol) ---
                 if (GetComponentInParent<EnemyPatrol>() != null)
                     GetComponentInParent<EnemyPatrol>().enabled = false;
 
+                // --- ENEMY (Melee) ---
+                // DÜZELTME BURADA YAPILDI:
                 if (GetComponent<MeleeEnemy>() != null)
-                    GetComponent<PlayerMovement>().enabled = false;
+                    GetComponent<MeleeEnemy>().enabled = false; // Eskiden burada PlayerMovement yazýyordu
+
                 dead = true;
-                SoundManager.instance.PlaySound(deathSound);
+
+                if (SoundManager.instance != null)
+                    SoundManager.instance.PlaySound(deathSound);
             }
-                
-            
         }
     }
+
     public void AddHealth(float _value)
     {
         currentHealth = Mathf.Clamp(currentHealth + _value, 0, startingHealth);
     }
+
     private IEnumerator Invunerability()
     {
         Physics2D.IgnoreLayerCollision(10, 11, true);
@@ -73,6 +82,7 @@ public class Health : MonoBehaviour
         }
         Physics2D.IgnoreLayerCollision(10, 11, false);
     }
+
     private void Deactivate()
     {
         gameObject.SetActive(false);

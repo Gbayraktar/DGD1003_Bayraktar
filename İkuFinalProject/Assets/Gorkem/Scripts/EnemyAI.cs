@@ -4,107 +4,87 @@ using UnityEngine;
 public class EnemyAI : MonoBehaviour
 {
     [Header("Bileşenler")]
-    private Animator anim;      // Animasyon kontrolcüsü
-    private Rigidbody2D rb;     // Fizik bileşeni
+    private Animator anim;
+    private Rigidbody2D rb;
+    private Transform player;
 
-    [Header("Hareket Ayarları")]
-    public Transform player;        // Hedef (Player)
-    public float speed = 3f;        // Yürüme hızı
-    public float followRange = 10f; // Takip mesafesi
-
-    [Header("Can Ayarları")]
-    public int maxHealth = 100;     // Maksimum can
-    public int currentHealth;       // Anlık can
-
-    [Header("Saldırı & Fizik")]
-    public int damage = 10;            // Player'a vereceği hasar
+    [Header("Hareket & Fizik")]
+    public float speed = 3f;           // Yürüme hızı
+    public float followRange = 100f;   // Takip mesafesi (Büyük yaptık ki hep kovalasın)
     public float knockbackForce = 5f;  // Geri tepme gücü
-    public float stunTime = 0.3f;      // Darbe alınca sersemleme süresi
+    public float stunTime = 0.3f;      // Sersemleme süresi
+
+    [Header("Can & Saldırı")]
+    public int maxHealth = 100;
+    public int currentHealth;
+    public int damage = 10;            // Player'a verdiği hasar
+
+    [Header("Görsel & Ses Efektleri")]
+    public GameObject deathEffectPrefab; // Ölünce çıkan partikül (Kan/Patlama)
+    public AudioClip deathSound;         // Ölünce çıkan ses
 
     [Header("Ödüller")]
-    public GameObject xpPrefab;     // XP Topu Prefabı
-    public int scoreValue = 10;     // Ölünce kaç puan versin?
+    public GameObject xpPrefab;        // XP Topu
+    public int scoreValue = 100;       // Öldürünce kaç puan?
 
-    [Header("Ses Efektleri")]
-    public AudioClip deathSound;    // Ölme sesi (Mp3/Wav)
+    [Header("Boss Ayarları")]
+    public bool isBoss = false;        // Eğer bu Boss ise işaretle!
 
-    [Header("Boss Ayarı")]
-    public bool isBoss = false;     // Sadece Boss prefabında işaretle!
-
-    // Düşmanın o an sersemleyip sersemlemediğini kontrol eder
+    // Kontrol Değişkenleri
     private bool isKnockedBack = false;
-
-    // Boss boyutunun bozulmaması için başlangıç boyutunu hafızada tutuyoruz
-    private Vector3 defaultScale;
+    private Vector3 defaultScale;      // Boss'un orijinal boyutunu saklamak için
 
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
-
-        // Canı fulle
         currentHealth = maxHealth;
 
-        // Başlangıç boyutunu kaydet (Boss ise 3,3,1 kalır, zombiyse 1,1,1)
+        // Başlangıç boyutunu kaydet (Boss büyütülmüşse bozulmasın diye)
         defaultScale = transform.localScale;
 
-        // Player'ı otomatik bul (Eğer sürüklemeyi unuttuysan)
-        if (player == null)
+        // Player'ı bul
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
         {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
-            {
-                player = playerObj.transform;
-            }
+            player = playerObj.transform;
         }
     }
 
     void Update()
     {
-        if (player == null) return;
+        // Player yoksa veya sersemlemişsek hareket etme
+        if (player == null || isKnockedBack) return;
 
-        // Eğer darbe yemişse (Knockback), hareket etmesin
-        if (isKnockedBack) return;
-
-        // Player ile mesafe ölç
         float distance = Vector2.Distance(transform.position, player.position);
 
-        // Menzildeyse YÜRÜ
         if (distance < followRange)
         {
-            // Player'a doğru hareket et
+            // HAREKET: Player'a doğru git
             transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
 
-            // Animasyon: Yürüme (Speed 1)
+            // Animasyon: Yürüme
             if (anim != null) anim.SetFloat("Speed", 1f);
 
-            // --- YÖN ÇEVİRME (FLIP) ---
-            // Player sağda mı solda mı? Ona göre yüzünü dön.
-            // defaultScale kullanarak Boss'un küçülmesini engelliyoruz.
+            // YÖN DÖNME (Flip) - Boss boyutunu koruyarak
             if (player.position.x > transform.position.x)
             {
-                // SAĞA BAK (Pozitif Boyut)
+                // Sağa bak (Orijinal pozitif boyut)
                 transform.localScale = new Vector3(Mathf.Abs(defaultScale.x), defaultScale.y, defaultScale.z);
             }
             else
             {
-                // SOLA BAK (Negatif Boyut)
+                // Sola bak (Negatif boyut)
                 transform.localScale = new Vector3(-Mathf.Abs(defaultScale.x), defaultScale.y, defaultScale.z);
             }
         }
-        else
-        {
-            // Duruyorsa Idle animasyonuna geç
-            if (anim != null) anim.SetFloat("Speed", 0f);
-        }
     }
 
-    // --- HASAR ALMA FONKSİYONU ---
+    // --- HASAR ALMA ---
     public void TakeDamage(int damageAmount)
     {
         currentHealth -= damageAmount;
 
-        // Animasyon: Darbe (Hit)
         if (anim != null) anim.SetTrigger("Hit");
 
         if (currentHealth <= 0)
@@ -113,104 +93,83 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // --- ÇARPIŞMA MANTIĞI ---
+    // --- ÇARPIŞMA (Player'a Vurma) ---
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            // 1. PLAYER'A HASAR VER
-            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(damage);
-            }
+            // 1. Player'a Hasar Ver
+            PlayerHealth ph = collision.gameObject.GetComponent<PlayerHealth>();
+            if (ph != null) ph.TakeDamage(damage);
 
-            // 2. PLAYER'I GERİ İT
-            PlayerMovement playerMove = collision.gameObject.GetComponent<PlayerMovement>();
-            // Eğer senin scriptin adı farklıysa (örn: PlayerMovementSc) burayı değiştir
-            if (playerMove != null)
-            {
-                // Player scriptinde CallKnockback fonksiyonu varsa çağır
-                // Yoksa hata vermemesi için burayı yorum satırı yapabilirsin
-                playerMove.CallKnockback(stunTime, knockbackForce, transform);
-            }
-
-            // 3. DÜŞMANI (KENDİNİ) GERİ İT
-            StartCoroutine(EnemyKnockbackRoutine(collision.transform));
+            // 2. Kendini Geri İttir
+            StartCoroutine(KnockbackRoutine(collision.transform));
         }
     }
 
-    // Düşmanın kendi geriye tepme rutini
-    IEnumerator EnemyKnockbackRoutine(Transform playerTransform)
+    // Geri Tepme Coroutine'i
+    IEnumerator KnockbackRoutine(Transform playerTransform)
     {
-        isKnockedBack = true; // Hareketi kilitle
+        isKnockedBack = true;
 
-        // Yönü hesapla: (Benim yerim - Player'ın yeri) = Geriye doğru
+        // Player'dan uzağa doğru yön hesapla
         Vector2 direction = (transform.position - playerTransform.position).normalized;
-
-        // Önceki hızı sıfırla ve kuvvet uygula
-        rb.linearVelocity = Vector2.zero; // Unity 6 kullanıyorsan rb.linearVelocity yap
+        rb.linearVelocity = Vector2.zero; // Unity 6 için rb.linearVelocity olabilir
         rb.AddForce(direction * knockbackForce, ForceMode2D.Impulse);
 
-        // Sersemleme süresi kadar bekle
         yield return new WaitForSeconds(stunTime);
 
-        // Normale dön
         rb.linearVelocity = Vector2.zero;
-        isKnockedBack = false; // Kilidi aç
+        isKnockedBack = false;
     }
 
-    // --- ÖLÜM FONKSİYONU ---
+    // --- ÖLÜM ---
     void Die()
     {
-        // 1. SESİ ÇAL (Düşman yok olsa bile ses devam eder)
+        // 1. SES EFEKTİ
         if (deathSound != null)
         {
+            // PlayClipAtPoint, obje yok olsa bile sesi çalar
             AudioSource.PlayClipAtPoint(deathSound, transform.position, 1f);
         }
 
-        // 2. BOSS KONTROLÜ (Eğer bu bir Boss ise oyunu bitir)
+        // 2. PARTİKÜL EFEKTİ (Particle System)
+        if (deathEffectPrefab != null)
+        {
+            Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+            // Efekt prefabında "Stop Action: Destroy" ayarlı olmalı!
+        }
+
+        // 3. BOSS ÖZEL DURUMU (ZAFER)
         if (isBoss)
         {
-            Debug.Log("BOSS ÖLDÜ! ZAFER!");
+            Debug.Log("BOSS YENİLDİ! OYUN BİTTİ.");
 
-            // Sayacı Durdur
+            // Sayacı durdur
             SurvivalTimer timer = FindObjectOfType<SurvivalTimer>();
             if (timer != null) timer.StopTimer();
 
-            // Game Over (Win) Ekranını Aç
+            // Game Over (Win) Panelini aç
             GameoverManager gm = FindObjectOfType<GameoverManager>();
             if (gm != null) gm.ShowGameOver();
         }
 
-        // 3. PUAN VER VE LEŞ SAY
+        // 4. ÖDÜLLER (Puan, XP, Loot)
         if (ScoreManager.instance != null)
         {
             ScoreManager.instance.AddScore(scoreValue);
             ScoreManager.instance.AddKill();
         }
 
-        // 4. XP DÜŞÜR
         if (xpPrefab != null)
         {
             Instantiate(xpPrefab, transform.position, Quaternion.identity);
         }
 
-        // 5. GANİMET (LOOT) DÜŞÜR
         LootBag lootBag = GetComponent<LootBag>();
-        if (lootBag != null)
-        {
-            lootBag.DropLoot();
-        }
+        if (lootBag != null) lootBag.DropLoot();
 
-        // 6. YOK OL
+        // 5. YOK OL
         Destroy(gameObject);
-    }
-
-    // Editörde menzili çizgi olarak görmek için
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, followRange);
     }
 }

@@ -1236,12 +1236,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 490389362}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7703b5dadd1524247a9e0791f408f1a1, type: 3}
+  m_Script: {fileID: 11500000, guid: 4b57c5d2c1ee7b747bb9384cb1ffd915, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuPanel: {fileID: 0}
-  creditsPanel: {fileID: 0}
-  levelSelectPanel: {fileID: 0}
 --- !u!1 &503841735
 GameObject:
   m_ObjectHideFlags: 0
@@ -3065,8 +3062,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 490389371}
-        m_TargetAssemblyTypeName: LevelMenu, Assembly-CSharp
-        m_MethodName: LoadLevel2
+        m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
+        m_MethodName: LoadNextLevel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3150,10 +3147,10 @@ MonoBehaviour:
     messageShown: 0
   - name: orta
     prefab: {fileID: 4298860008882341506, guid: 85b1ef0b66eec564d938bf008bb6ce3d, type: 3}
-    startMinute: 2
+    startMinute: 0.3
     messageShown: 0
   bossPrefab: {fileID: 6786446922949375804, guid: 1941f9e2ea9cdd9489e0bd50caa26bcb, type: 3}
-  bossSpawnMinute: 0
+  bossSpawnMinute: 1
   bossWarningMessage: Boss Geliyor
   waveWarningText: {fileID: 2141445860}
   spawnInterval: 1
